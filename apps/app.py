@@ -4,24 +4,8 @@ import pandas as pd
 from PIL import Image
 import streamlit as st
 
+from apps.data_utils import DATA_PACKET
 from src.style_classification import StyleIntensityClassifier
-
-
-# DATA CONFIG (TO-DO: replace with @dataclass)
-SUBJECTIVE_TO_NEUTRAL = {
-    "source_attribute": "subjective",
-    "target_attribute": "neutral",
-    "examples": [
-        "the most serious scandal was the iran-contra affair.",
-        "chemical abstracts service (cas), a prominent division of the american chemical society, is the world's leading source of chemical information.",
-        "another strikingly elegant four-door saloon for the s3 continental came from james young.",
-    ],
-}
-
-CLS_MODEL_PATH = "cffl/bert-base-styleclassification-subjective-neutral"
-
-# CACHE MODELS
-sic = StyleIntensityClassifier(CLS_MODEL_PATH)
 
 # SESSION STATE UTILS
 if "page_progress" not in st.session_state:
