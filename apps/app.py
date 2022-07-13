@@ -52,6 +52,28 @@ class DisableableButton:
         )
 
 
+# MODEL CACHING
+@st.cache(
+    hash_funcs={tokenizers.Tokenizer: lambda _: None},
+    allow_output_mutation=True,
+    show_spinner=False,
+)
+def get_cached_style_intensity_classifier():
+    return StyleIntensityClassifier(DATA_PACKET[style_attribute].cls_model_path)
+
+
+@st.cache(
+    hash_funcs={tokenizers.Tokenizer: lambda _: None},
+    allow_output_mutation=True,
+    show_spinner=False,
+)
+def get_cached_word_attributions(text_sample):
+    it = InterpretTransformer(
+        cls_model_identifier=DATA_PACKET[style_attribute].cls_model_path
+    )
+    return it.visualize_feature_attribution_scores(text_sample).data
+
+
 # PAGE CONFIG
 ffl_favicon = Image.open("static/images/cldr-favicon.ico")
 st.set_page_config(
