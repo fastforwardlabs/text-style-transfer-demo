@@ -1,8 +1,10 @@
 from typing import List, Union
 
 import torch
+import tokenizers
 import numpy as np
 from pyemd import emd
+import streamlit as st
 from transformers import pipeline
 
 
@@ -52,12 +54,10 @@ class StyleIntensityClassifier:
 
         """
         if isinstance(input_text, str):
-            print(type(input_text))
             tmp = list()
             tmp.append(input_text)
             input_text = tmp
 
-        print(input_text)
         result = self.pipeline(input_text)
         distributions = np.array(
             [[label["score"] for label in item] for item in result]
