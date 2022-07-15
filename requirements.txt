@@ -1,0 +1,5 @@
+torch==1.12.0
+transformers==4.20.1
+pyemd==0.5.1
+transformers-interpret==0.7.2
+-e .
