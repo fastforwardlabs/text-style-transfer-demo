@@ -1,5 +1,6 @@
-from typing import Any, Iterable, List, Optional, Tuple, Union
+from typing import Iterable
 
+import altair as alt
 from captum.attr._utils.visualization import (
     VisualizationDataRecord,
     format_classname,
@@ -73,3 +74,36 @@ def visualize_text(
     display(html)
 
     return html
+
+
+def build_altair_classification_plot(format_cls_result):
+    """
+    Builds Altair bar chart for classification results.
+
+    Args:
+        format_cls_result (List): Output from `format_classification_results()`
+    """
+    source = alt.pd.DataFrame(format_cls_result)
+
+    color_scale = alt.Scale(
+        domain=["Subjective", "Neutral"], range=["#94c6da", "#1770ab"]
+    )
+
+    c = (
+        alt.Chart(source)
+        .mark_bar(size=50)
+        .encode(
+            x=alt.X(
+                "percentage_start:Q", axis=alt.Axis(title="Style Distribution (%)")
+            ),
+            x2=alt.X2("percentage_end:Q"),
+            color=alt.Color(
+                "type:N",
+                legend=alt.Legend(title="Attribute"),
+                scale=color_scale,
+            ),
+        )
+        .properties(height=150)
+    )
+
+    return c
