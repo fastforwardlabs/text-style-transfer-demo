@@ -47,22 +47,33 @@ class StyleAttributeData:
         return os.path.join(self.hf_base_url, getattr(self, attr_name))
 
 
-# instantiate data classes
-subjective_neutral = StyleAttributeData(
-    source_attribute="subjective",
-    target_attribute="neutral",
-    examples=[
-        "another strikingly elegant four-door saloon for the s3 continental came from james young.",
-        "the most serious scandal was the iran-contra affair.",
-        "chemical abstracts service (cas), a prominent division of the american chemical society, is the world's leading source of chemical information.",
-        "this is an objective statement.",
-    ],
-    cls_model_path="cffl/bert-base-styleclassification-subjective-neutral",
-    seq2seq_model_path="cffl/bart-base-styletransfer-subjective-to-neutral",
-)
-
-# collect all data class instances
-DATA_PACKET = {"subjective-to-neutral": subjective_neutral, "informal-to-formal": None}
+# instantiate data classes & collect all data class instances
+DATA_PACKET = {
+    "subjective-to-neutral": StyleAttributeData(
+        source_attribute="subjective",
+        target_attribute="neutral",
+        examples=[
+            "another strikingly elegant four-door saloon for the s3 continental came from james young.",
+            "the most serious scandal was the iran-contra affair.",
+            "chemical abstracts service (cas), a prominent division of the american chemical society, is the world's leading source of chemical information.",
+            "this is an objective statement.",
+        ],
+        cls_model_path="cffl/bert-base-styleclassification-subjective-neutral",
+        seq2seq_model_path="cffl/bart-base-styletransfer-subjective-to-neutral",
+    ),
+    "informal-to-formal": StyleAttributeData(
+        source_attribute="informal",
+        target_attribute="formal",
+        examples=[
+            "I am quitting my job",
+            "That was funny LOL",
+            "i loooooooooooooooooooooooove going to the movies.",
+            "It's piece of cake, we can do it",
+        ],
+        cls_model_path="cointegrated/roberta-base-formality",
+        seq2seq_model_path="prithivida/informal_to_formal_styletransfer",
+    ),
+}
 
 
 def format_classification_results(id2label: dict, cls_result):
