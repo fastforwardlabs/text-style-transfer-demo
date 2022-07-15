@@ -1,9 +1,59 @@
 import torch
+
+# from captum.attr import visualization as viz
+from apps.visualization_utils import visualize_text
 from transformers_interpret import SequenceClassificationExplainer
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
 )
+
+
+class CustomSequenceClassificationExplainer(SequenceClassificationExplainer):
+    """
+    Subclassing to replace `visualize()` method with custom styling.
+
+    Namely, removing a few columns, styling fonts, and re-arrangning legend position.
+    """
+
+    def visualize(self, html_filepath: str = None, true_class: str = None):
+        """
+        Visualizes word attributions. If in a notebook table will be displayed inline.
+        Otherwise pass a valid path to `html_filepath` and the visualization will be saved
+        as a html file.
+        If the true class is known for the text that can be passed to `true_class`
+        """
+        tokens = [token.replace("Ġ", "") for token in self.decode(self.input_ids)]
+        attr_class = self.id2label[self.selected_index]
+
+        if self._single_node_output:
+            if true_class is None:
+                true_class = round(float(self.pred_probs))
+            predicted_class = round(float(self.pred_probs))
+            attr_class = round(float(self.pred_probs))
+        else:
+            if true_class is None:
+                true_class = self.selected_index
+            predicted_class = self.predicted_class_name
+
+        score_viz = self.attributions.visualize_attributions(  # type: ignore
+            self.pred_probs,
+            predicted_class,
+            true_class,
+            attr_class,
+            tokens,
+        )
+
+        # NOTE: here is the overwritten function
+        html = visualize_text([score_viz])
+
+        if html_filepath:
+            if not html_filepath.endswith(".html"):
+                html_filepath = html_filepath + ".html"
+            with open(html_filepath, "w") as html_file:
+                html_file.write(html.data)
+
+        return html
 
 
 class InterpretTransformer:
@@ -43,7 +93,7 @@ class InterpretTransformer:
         self.cls_model.to(self.device)
 
         # transformers interpret
-        self.explainer = SequenceClassificationExplainer(
+        self.explainer = CustomSequenceClassificationExplainer(
             self.cls_model, self.cls_tokenizer
         )
 
