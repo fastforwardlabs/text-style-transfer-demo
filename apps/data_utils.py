@@ -113,8 +113,10 @@ def build_altair_classification_plot(format_cls_result):
         alt.Chart(source)
         .mark_bar(size=50)
         .encode(
-            x="percentage_start:Q",
-            x2="percentage_end:Q",
+            x=alt.X(
+                "percentage_start:Q", axis=alt.Axis(title="Style Distribution (%)")
+            ),
+            x2=alt.X2("percentage_end:Q"),
             color=alt.Color(
                 "type:N",
                 legend=alt.Legend(title="Attribute"),
