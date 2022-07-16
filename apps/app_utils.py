@@ -3,11 +3,7 @@ from typing import List
 import tokenizers
 import streamlit as st
 
-
-from apps.data_utils import string_to_list_string
-
-
-from apps.data_utils import StyleAttributeData
+from apps.data_utils import StyleAttributeData, string_to_list_string
 
 from src.style_transfer import StyleTransfer
 from src.style_classification import StyleIntensityClassifier
@@ -68,13 +64,32 @@ def get_cached_style_intensity_classifier(
     """
     Return a cached style classifier.
 
+    This function overwrites the existing model's config values for
+    `id2label` and `label2id`.
+
     Args:
         style_data (StyleAttributeData)
 
     Returns:
         StyleIntensityClassifier
     """
-    return StyleIntensityClassifier(style_data.cls_model_path)
+    sic = StyleIntensityClassifier(style_data.cls_model_path)
+
+    # create or overwrite id-label lookup in model config
+    sic.pipeline.model.config.__dict__["id2label"] = {
+        i: a
+        for i, a in enumerate(
+            [
+                style_data.source_attribute.capitalize(),
+                style_data.target_attribute.capitalize(),
+            ]
+        )
+    }
+    sic.pipeline.model.config.__dict__["label2id"] = {
+        v: k for k, v in sic.pipeline.model.config.__dict__["id2label"].items()
+    }
+
+    return sic
 
 
 @st.cache(
