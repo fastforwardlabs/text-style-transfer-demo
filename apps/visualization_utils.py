@@ -3,7 +3,6 @@ from typing import Iterable
 import altair as alt
 from captum.attr._utils.visualization import (
     VisualizationDataRecord,
-    format_classname,
     format_word_importances,
     _get_color,
 )
@@ -15,6 +14,8 @@ try:
 except ImportError:
     HAS_IPYTHON = False
 
+def format_classname(classname):
+    return f'<td>{classname}</td>'
 
 def visualize_text(
     datarecords: Iterable[VisualizationDataRecord], legend: bool = True
@@ -23,29 +24,36 @@ def visualize_text(
         "IPython must be available to visualize text. "
         "Please run 'pip install ipython'."
     )
-    dom = [
-        """<table width:100; style='font-family:"Source Sans Pro", sans-serif'; border-collapse:collapse;>"""
-    ]
+
+    dom = []
+    dom.append(
+        '<head><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"></head>'
+    )
+    dom.append("""<table width:100; class="table">""")
     rows = [
-        '<tr style="text-align:left; font-size: 20; font-weight: bold; color: 00a2ad;"><td>Predicted Label</td>'
-        "<td>Attribution Score</td>"
-        "<td>Word Importance</td>"
+        "<thead>"
+        "<tr>"
+        "<th scope='col'><span class='text-nowrap'>Predicted Label</span></th>"
+        "<th scope='col'><span class='text-nowrap'>Attribution Score</span></th>"
+        "<th scope='col'><span class='text-nowrap'>Feature Importance</span></th>"
+        "</tr>"
+        "</thead>"
     ]
     for datarecord in datarecords:
         rows.append(
             "".join(
                 [
+                    "<tbody>",
                     "<tr>",
                     format_classname(
-                        "{0} ({1:.2f})".format(
-                            datarecord.pred_class, datarecord.pred_prob
-                        )
+                        f"{datarecord.pred_class.capitalize()}"
                     ),
-                    format_classname("{0:.2f}".format(datarecord.attr_score)),
+                    format_classname(f"{round(datarecord.attr_score.item(), 2)}"),
                     format_word_importances(
                         datarecord.raw_input_ids, datarecord.word_attributions
                     ),
                     "<tr>",
+                    "</tbody>",
                 ]
             )
         )
@@ -54,10 +62,8 @@ def visualize_text(
     dom.append("</table>")
 
     if legend:
-        dom.append(
-            '<div style="border-top: 1px solid; margin-top: 5px; \
-            padding-top: 5px; display: inline-block">'
-        )
+        dom.append("<div class='row'>")
+        dom.append("<div class='col-6'>")
         dom.append("<b>Legend: </b>")
 
         for value, label in zip([-1, 0, 1], ["Negative", "Neutral", "Positive"]):
@@ -68,6 +74,9 @@ def visualize_text(
                     value=_get_color(value), label=label
                 )
             )
+        dom.append("</div>")
+        dom.append("<div class='col-6'></div>")
+
         dom.append("</div>")
 
     html = HTML("".join(dom))
@@ -86,7 +95,8 @@ def build_altair_classification_plot(format_cls_result):
     source = alt.pd.DataFrame(format_cls_result)
 
     color_scale = alt.Scale(
-        domain=["Subjective", "Neutral"], range=["#94c6da", "#1770ab"]
+        domain=[record["type"] for record in format_cls_result],
+        range=["#94c6da", "#1770ab"],
     )
 
     c = (
