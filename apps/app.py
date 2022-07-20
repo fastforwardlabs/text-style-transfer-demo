@@ -1,3 +1,4 @@
+from matplotlib import style
 import pandas as pd
 from PIL import Image
 import streamlit as st
@@ -8,8 +9,8 @@ from apps.data_utils import (
     format_classification_results,
 )
 from apps.app_utils import (
-    reset_page_progress_state,
     DisableableButton,
+    reset_page_progress_state,
     get_cached_style_intensity_classifier,
     get_cached_word_attributions,
     get_sti_metric,
@@ -47,23 +48,30 @@ st.sidebar.write(
 st.sidebar.markdown("## Select a style attribute")
 style_attribute = st.sidebar.selectbox(
     "What style would you like to transfer between?",
-    options=DATA_PACKET.keys(),
-    help="ADD HELP MESSAGE HERE!",
+    options=DATA_PACKET.keys()
 )
 STYLE_ATTRIBUTE_DATA = DATA_PACKET[style_attribute]
 
-st.sidebar.button("Start over!", on_click=reset_page_progress_state)
+st.sidebar.markdown("## Start over")
+st.sidebar.caption("This application is intended to be run sequentially from top to bottom. If you wish to alter selections after \
+    advancing through the app, push the button below to start fresh from the beginning.")
+st.sidebar.button("Restart from beginning", on_click=reset_page_progress_state)
 
 # MAIN CONTENT
 st.markdown("# Intelligent Writing Assistance with Text Style Transfer")
 
 st.write(
-    """The goal of this application is to demonstrate how the NLP task of _text style transfer_ can be applied to enhance the human writing experience. \
-    In this sense, we intend to peel back the curtains on how intelligent writing assistants might function — walking through the logical steps needed to \
-    automatically re-style a piece of text while building up confidence in the model output. \
-    \n\n We emphasize the imperative for a human-in-the-loop user experience when dealing with natural language generation systems. We believe text style \
-    transfer has the potential to empower writers to better express themselves, but not by blindly generating text. Rather, generative models, in conjunction with \
-    interpretability methods, should be be combined to help writers understand the nuances of linguistic "style" and suggest edits that may improve their writing."""
+    """
+    The goal of this application is to demonstrate how the NLP task of _text style transfer_ can be applied to enhance the human writing experience. 
+    In this sense, we intend to peel back the curtains on how an intelligent writing assistant might function — walking through the logical steps needed to 
+    automatically re-style a piece of text while building up confidence in the model output. 
+
+    We emphasize the imperative for a human-in-the-loop user experience when dealing with natural language generation systems. We believe text style 
+    transfer has the potential to empower writers to better express themselves, but not by blindly generating text. Rather, generative models, in conjunction with 
+    interpretability methods, should be combined to help writers understand the nuances of linguistic style and suggest stylistic edits that may improve their writing.
+
+    Select a style attribute from the sidebar and enter some text below to get started!
+    """
 )
 
 ## 1. INPUT EXAMPLE
@@ -120,8 +128,8 @@ if st.session_state.page_progress > 1:
             we classify the sample text with [a model]({STYLE_ATTRIBUTE_DATA.build_model_url("cls")}) that has been fine-tuned to differentiate between
             {STYLE_ATTRIBUTE_DATA.attribute_AND_string} tones. 
             
-            In a product setting, you could imagine this style detection process running inside your favorite word processor, prompting you for action when it 
-            detects language that is at odds with your desired tone of voice.
+            In a product setting, you could imagine this style detection process running continuously inside your favorite word processor as you write, 
+            prompting you for action when it detects language that is at odds with your desired tone of voice.
             """
     )
 
@@ -141,7 +149,6 @@ if st.session_state.page_progress > 1:
         format_cls_result = format_classification_results(
             id2label=sic.pipeline.model.config.id2label, cls_result=cls_result
         )
-
         st.markdown("##### Distribution Between Style Classes")
         chart = build_altair_classification_plot(format_cls_result)
         st.altair_chart(chart.interactive(), use_container_width=True)
@@ -156,9 +163,11 @@ if st.session_state.page_progress > 1:
 
     if cls_result[0]["label"].lower() != STYLE_ATTRIBUTE_DATA.target_attribute:
         st.info(
-            f"""**Looks like we have room for improvement!** \n\n\n The distribution of classification scores suggests that the input text is more \
-            {STYLE_ATTRIBUTE_DATA.attribute_THAN_string}. Therefore, \
-                an automated style transfer may improve our intended tone of voice."""
+            f"""
+            **Looks like we have room for improvement!**
+            
+            The distribution of classification scores suggests that the input text is more {STYLE_ATTRIBUTE_DATA.attribute_THAN_string}. Therefore,
+            an automated style transfer may improve our intended tone of voice."""
         )
         db2 = DisableableButton(2, "Let's see why")
         db2.create_enabled_button()
@@ -174,22 +183,25 @@ if st.session_state.page_progress > 2:
     db2.disable()
     st.write("### 3. Interpret the classification result")
     st.write(
-        f"""Interpreting our model's output is a crucial practice that helps build trust and justify taking real-world action from the \
-            model predictions. In this case, we apply a popular model interpretability technique called [Integrated Gradients](https://arxiv.org/pdf/1703.01365.pdf) \
-            to the Transformer-based classifier to explain the model's prediction in terms of its features."""
+        f"""
+        Interpreting our model's output is a crucial practice that helps build trust and justify taking real-world action from the
+        model predictions. In this case, we apply a popular model interpretability technique called [Integrated Gradients](https://arxiv.org/pdf/1703.01365.pdf) 
+        to the Transformer-based classifier to explain the model's prediction in terms of its features."""
     )
 
     with st.spinner("Interpreting the prediction, hang tight!"):
         word_attributions_visual = get_cached_word_attributions(
             text_sample=text_sample, style_data=STYLE_ATTRIBUTE_DATA
         )
-        components.html(html=word_attributions_visual, height=150, scrolling=True)
+        components.html(html=word_attributions_visual, height=200, scrolling=True)
 
     st.write(
-        f"""The visual above displays word attributions using the [Transformers Interpret](https://github.com/cdpierse/transformers-interpret) library. \
-            Positive attribution values (green) indicate tokens that contribute positively towards the \
-            predicted class ("{STYLE_ATTRIBUTE_DATA.source_attribute}"), while negative values (red) indicate tokens that contribute negatively towards the predicted class. \
-            \n\n\n Visualizing word attributions is a helpful way to build intuition about what makes the input text "{STYLE_ATTRIBUTE_DATA.source_attribute}"!"""
+        f"""
+        The visual above displays word attributions using the [Transformers Interpret](https://github.com/cdpierse/transformers-interpret) library. 
+        Positive attribution values (green) indicate tokens that contribute positively towards the 
+        predicted class ({STYLE_ATTRIBUTE_DATA.source_attribute}), while negative values (red) indicate tokens that contribute negatively towards the predicted class.
+        
+        Visualizing word attributions is a helpful way to build intuition about what makes the input text _{STYLE_ATTRIBUTE_DATA.source_attribute}_!"""
     )
     db3 = DisableableButton(3, "Next")
     db3.create_enabled_button()
@@ -231,7 +243,7 @@ if st.session_state.page_progress > 3:
         """
     )
 
-    col4_1, col4_2, col4_3 = st.columns([1, 8, 8])
+    col4_1, col4_2, col4_3 = st.columns([1, 5, 4])
     with col4_2:
         st.markdown(
             f"""
@@ -242,7 +254,6 @@ if st.session_state.page_progress > 3:
         )
     with col4_3:
         with st.container():
-
             st.write("")
             st.button(
                 "Generate style transfer",
@@ -259,7 +270,7 @@ if st.session_state.page_progress > 3:
 
     if st.session_state.st_result:
         st.warning(
-            f"""**{STYLE_ATTRIBUTE_DATA.source_attribute.capitalize()} Input:** "{text_sample} """
+            f"""**{STYLE_ATTRIBUTE_DATA.source_attribute.capitalize()} Input:** "{text_sample}" """
         )
         st.info(
             f"""
@@ -275,14 +286,14 @@ if st.session_state.page_progress > 4:
     st.markdown(
         """
         Blindly prompting a writer with style suggestions without first checking quality would make for a noisy, error-prone product
-        with a poor user experience -- ultimately, we only want to suggest high quality edits. How do we check for quality?
+        with a poor user experience. Ultimately, we only want to suggest high quality edits. But what makes for a suggestion-worthy edit?
 
         A comprehensive quality evaluation for text style transfer output should consider three criteria:
         1. **Style strength** - To what degree does the generated text achieve the target style? 
         2. **Content preservation** - To what degree does the generated text retain the semantic meaning of the source text?
         3. **Fluency** - To what degree does the generated text appear as if it were produced naturally by a human?
 
-        Below, we apply automated evaluation metrics -- _Style Transfer Intensity (STI)_ & _Content Preservation Score (CPS)_ -- to
+        Below, we apply automated evaluation metrics - _Style Transfer Intensity (STI)_ & _Content Preservation Score (CPS)_ - to
         measure the first two of these criteria by comparing the input text to the generated suggestion.
         """
     )
@@ -310,7 +321,7 @@ if st.session_state.page_progress > 4:
     with col5_1:
         st.metric(
             label="Style Transfer Intensity (STI)",
-            value=f"{sti[0]*100}",
+            value=f"{round(sti[0]*100,2)}",
         )
         st.caption(
             f"""
@@ -323,11 +334,11 @@ if st.session_state.page_progress > 4:
     with col5_3:
         st.metric(
             label="Content Preservation Score (CPS)",
-            value=f"{cps[0]*100}%",
+            value=f"{round(cps[0]*100,2)}%",
         )
         st.caption(
             f"""
-                CPS compares the latent space embeedings (determined by [SentenceBERT]({STYLE_ATTRIBUTE_DATA.build_model_url("sbert")}))
+                CPS compares the latent space embeddings (determined by [SentenceBERT]({STYLE_ATTRIBUTE_DATA.build_model_url("sbert")}))
                 between the input text and generated suggestion using cosine similarity. Therefore, CPS can be thought of as the percentage of content that was perserved
                 during the style transfer.
                 """
