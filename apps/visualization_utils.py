@@ -96,7 +96,7 @@ def build_altair_classification_plot(format_cls_result):
 
     color_scale = alt.Scale(
         domain=[record["type"] for record in format_cls_result],
-        range=["#94c6da", "#1770ab"],
+        range=["#00A3AF", "#F96702"],
     )
 
     c = (
