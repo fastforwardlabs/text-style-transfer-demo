@@ -1,4 +1,3 @@
-from ast import Num
 from typing import List, Union
 
 import torch

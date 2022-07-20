@@ -1,6 +1,5 @@
 import torch
 
-# from captum.attr import visualization as viz
 from apps.visualization_utils import visualize_text
 from transformers_interpret import SequenceClassificationExplainer
 from transformers import (

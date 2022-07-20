@@ -3,12 +3,11 @@ from typing import List
 import tokenizers
 import streamlit as st
 
-from apps.data_utils import StyleAttributeData, string_to_list_string
-
 from src.style_transfer import StyleTransfer
 from src.style_classification import StyleIntensityClassifier
 from src.content_preservation import ContentPreservationScorer
 from src.transformer_interpretability import InterpretTransformer
+from apps.data_utils import StyleAttributeData, string_to_list_string
 
 # CALLBACKS
 def increment_page_progress():

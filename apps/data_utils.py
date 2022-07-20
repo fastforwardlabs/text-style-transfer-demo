@@ -1,9 +1,9 @@
 import os
 from typing import List
 from collections import defaultdict
+from dataclasses import dataclass
 
 import numpy as np
-from dataclasses import dataclass
 
 
 @dataclass
