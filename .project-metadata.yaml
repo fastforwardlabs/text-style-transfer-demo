@@ -23,7 +23,7 @@ tasks:
     short_summary: Starting streamlit application
     name: Intelligent Writing Assistance with Text Style Transfer
     subdomain: tst
-    script: scripts/launch-app.py
+    script: scripts/launch_app.py
     environment_variables:
       TASK_TYPE: START_APPLICATION
     cpu: 2
