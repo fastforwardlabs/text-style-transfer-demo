@@ -16,6 +16,7 @@ def increment_page_progress():
 
 
 def reset_page_progress_state():
+    del st.session_state.st_result
     st.session_state.page_progress = 1
 
 
@@ -103,6 +104,9 @@ def get_cached_word_attributions(
     """
     Calculated word attributions and return HTML visual.
 
+     This function overwrites the existing model's config values for
+    `id2label` and `label2id`.
+
     Args:
         text_sample (str)
         style_data (StyleAttributeData)
@@ -111,6 +115,20 @@ def get_cached_word_attributions(
         str
     """
     it = InterpretTransformer(cls_model_identifier=style_data.cls_model_path)
+
+    # create or overwrite id-label lookup in model config
+    it.explainer.id2label = {
+        i: a
+        for i, a in enumerate(
+            [
+                style_data.source_attribute.capitalize(),
+                style_data.target_attribute.capitalize(),
+            ]
+        )
+    }
+    it.explainer.label2id = {
+        v: k for k, v in it.explainer.id2label.items()
+    }
     return it.visualize_feature_attribution_scores(text_sample).data
 
 
@@ -170,12 +188,6 @@ def get_cps_metric(
         mask_type="none",
     )
 
-
-@st.cache(
-    hash_funcs={tokenizers.Tokenizer: lambda _: None},
-    allow_output_mutation=True,
-    show_spinner=False,
-)
 def generate_style_transfer(
     text_sample: str,
     style_data: StyleAttributeData,
