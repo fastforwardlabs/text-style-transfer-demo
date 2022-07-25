@@ -39,14 +39,13 @@
 # ###########################################################################
 
 import torch
-
-from apps.visualization_utils import visualize_text
 from transformers_interpret import SequenceClassificationExplainer
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
 )
 
+from apps.visualization_utils import visualize_text
 
 class CustomSequenceClassificationExplainer(SequenceClassificationExplainer):
     """

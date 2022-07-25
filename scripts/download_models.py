@@ -38,12 +38,10 @@
 #
 # ###########################################################################
 
-from turtle import st
 from apps.data_utils import DATA_PACKET
 from src.style_transfer import StyleTransfer
 from src.style_classification import StyleIntensityClassifier
 from src.content_preservation import ContentPreservationScorer
-from src.transformer_interpretability import InterpretTransformer
 
 
 def load_and_cache_HF_models(style_data_packet):
