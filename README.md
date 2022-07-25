@@ -35,9 +35,6 @@ Through the application, we emphasize the imperative for a human-in-the-loop use
 │   └── transformer_interpretability.py
 ├── static
 │   └── images
-│       ├── app_screenshot.png
-│       ├── cldr-favicon.ico
-│       └── ffllogo2@1x.png
 └── tests
     ├── __init__.py
     └── test_style_transfer.py
