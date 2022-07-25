@@ -40,8 +40,8 @@ ffl_logo = Image.open("static/images/ffllogo2@1x.png")
 st.sidebar.image(ffl_logo)
 
 st.sidebar.write(
-    "This prototype accompanies our [Text Style Transfer]() blog series in which we \
-    explore the task of automatically neutralizing subjectivity bias in free text."
+    "This prototype accompanies our [Text Style Transfer](https://blog.fastforwardlabs.com/2022/03/22/an-introduction-to-text-style-transfer.html)\
+     blog series in which we explore the task of automatically neutralizing subjectivity bias in free text."
 )
 
 st.sidebar.markdown("## Select a style attribute")
@@ -57,7 +57,7 @@ st.sidebar.caption("This application is intended to be run sequentially from top
 st.sidebar.button("Restart from beginning", on_click=reset_page_progress_state)
 
 # MAIN CONTENT
-st.markdown("# Intelligent Writing Assistance with Text Style Transfer")
+st.markdown("# Exploring Intelligent Writing Assistance")
 
 st.write(
     """
@@ -65,9 +65,9 @@ st.write(
     In this sense, we intend to peel back the curtains on how an intelligent writing assistant might function — walking through the logical steps needed to 
     automatically re-style a piece of text while building up confidence in the model output. 
 
-    We emphasize the imperative for a human-in-the-loop user experience when dealing with natural language generation systems. We believe text style 
+    We emphasize the imperative for a human-in-the-loop user experience when designing natural language generation systems. We believe text style 
     transfer has the potential to empower writers to better express themselves, but not by blindly generating text. Rather, generative models, in conjunction with 
-    interpretability methods, should be combined to help writers understand the nuances of linguistic style and suggest stylistic edits that may improve their writing.
+    interpretability methods, should be combined to help writers understand the nuances of linguistic style and suggest stylistic edits that _may_ improve their writing.
 
     Select a style attribute from the sidebar and enter some text below to get started!
     """
@@ -124,7 +124,7 @@ if st.session_state.page_progress > 1:
     st.write(
         f"""
             Before we can transfer style, we need to ensure the input text isn't already of the target style! To do so,
-            we classify the sample text with [a model]({STYLE_ATTRIBUTE_DATA.build_model_url("cls")}) that has been fine-tuned to differentiate between
+            we classify the sample text with a model that has been fine-tuned to differentiate between
             {STYLE_ATTRIBUTE_DATA.attribute_AND_string} tones. 
             
             In a product setting, you could imagine this style detection process running continuously inside your favorite word processor as you write, 
@@ -154,6 +154,7 @@ if st.session_state.page_progress > 1:
 
         st.markdown(
             f"""
+            - **:hugging_face: Model:** [{STYLE_ATTRIBUTE_DATA.cls_model_path}]({STYLE_ATTRIBUTE_DATA.build_model_url("cls")})
             - **Input Text:** *"{text_sample}"*
             - **Classification Result:** \t {cls_result[0]["label"].capitalize()} ({round(cls_result[0]["score"]*100, 2)}%)
             """
