@@ -42,6 +42,8 @@ import pytest
 import transformers
 
 from src.style_transfer import StyleTransfer
+from src.content_preservation import ContentPreservationScorer
+from src.style_classification import StyleIntensityClassifier
 
 
 @pytest.fixture
@@ -50,14 +52,23 @@ def subjectivity_styletransfer():
     return StyleTransfer(model_identifier=MODEL_PATH, max_gen_length=200)
 
 
-def test_StyleTransfer_init(subjectivity_styletransfer):
-    assert isinstance(
-        subjectivity_styletransfer.pipeline,
-        transformers.pipelines.text2text_generation.Text2TextGenerationPipeline,
+@pytest.fixture
+def subjectivity_styleintensityclassifier():
+    CLS_MODEL_PATH = "cffl/bert-base-styleclassification-subjective-neutral"
+    return StyleIntensityClassifier(model_identifier=CLS_MODEL_PATH)
+
+
+@pytest.fixture
+def subjectivity_contentpreservationscorer():
+    CLS_MODEL_PATH = "cffl/bert-base-styleclassification-subjective-neutral"
+    SBERT_MODEL_PATH = "sentence-transformers/all-MiniLM-L6-v2"
+    return ContentPreservationScorer(
+        cls_model_identifier=CLS_MODEL_PATH, sbert_model_identifier=SBERT_MODEL_PATH
     )
 
 
-def test_StyleTransfer_transfer(subjectivity_styletransfer):
+@pytest.fixture
+def subjectivity_example_data():
     examples = [
         """there is an iconic roadhouse, named "spud's roadhouse", which sells fuel and general shop items , has great meals and has accommodation.""",
         "chemical abstracts service (cas), a prominent division of the american chemical society, is the world's leading source of chemical information.",
@@ -74,4 +85,64 @@ def test_StyleTransfer_transfer(subjectivity_styletransfer):
         "other ambassadors also sent their messages of condolence following her death.",
     ]
 
-    assert ground_truth == subjectivity_styletransfer.transfer(examples)
+    return {"examples": examples, "ground_truth": ground_truth}
+
+
+def test_StyleTransfer_init(subjectivity_styletransfer):
+    assert isinstance(
+        subjectivity_styletransfer.pipeline,
+        transformers.pipelines.text2text_generation.Text2TextGenerationPipeline,
+    )
+
+
+def test_StyleIntensityClassifier_init(subjectivity_styleintensityclassifier):
+    assert isinstance(
+        subjectivity_styleintensityclassifier.pipeline,
+        transformers.pipelines.text_classification.TextClassificationPipeline,
+    )
+
+
+def test_ContentPreservationScorer_init(subjectivity_contentpreservationscorer):
+    assert isinstance(
+        subjectivity_contentpreservationscorer.cls_model,
+        transformers.models.bert.modeling_bert.BertForSequenceClassification,
+    )
+    assert isinstance(
+        subjectivity_contentpreservationscorer.sbert_model,
+        transformers.models.bert.modeling_bert.BertModel,
+    )
+
+
+def test_StyleTransfer_transfer(subjectivity_styletransfer, subjectivity_example_data):
+    assert subjectivity_example_data[
+        "ground_truth"
+    ] == subjectivity_styletransfer.transfer(subjectivity_example_data["examples"])
+
+
+def test_StyleIntensityClassifier_calculate_transfer_intensity_fraction(
+    subjectivity_styleintensityclassifier, subjectivity_example_data
+):
+    sti_frac = (
+        subjectivity_styleintensityclassifier.calculate_transfer_intensity_fraction(
+            input_text=subjectivity_example_data["examples"],
+            output_text=subjectivity_example_data["ground_truth"],
+        )
+    )
+    assert sti_frac == [
+        0.9891820847234861,
+        0.9808499743983614,
+        0.8070009460737938,
+        0.9913705583756346,
+        0.9611679711017459,
+    ]
+
+
+def test_ContentPreservationScorer_calculate_content_preservation_score(
+    subjectivity_contentpreservationscorer, subjectivity_example_data
+):
+    cps = subjectivity_contentpreservationscorer.calculate_content_preservation_score(
+        input_text=subjectivity_example_data["examples"],
+        output_text=subjectivity_example_data["ground_truth"],
+        mask_type="none",
+    )
+    assert cps == [0.9369, 0.9856, 0.7328, 0.9718, 0.9709]
