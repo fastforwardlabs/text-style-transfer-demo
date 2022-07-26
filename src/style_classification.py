@@ -141,6 +141,79 @@ class StyleIntensityClassifier:
             for i in range(len(input_dist))
         ]
 
+    def calculate_transfer_intensity_fraction(
+        self, input_text: List[str], output_text: List[str], target_class_idx: int = 1
+    ) -> List[float]:
+        """
+        Calcualates the style transfer intensity (STI) _fraction_ between two pieces of text.
+        See `calcualte_sti_fraction()` for details.
+
+        Args:
+            input_text (list) - list of input texts with indicies corresponding
+                to counterpart in output_text
+            ouptput_text (list) - list of output texts with indicies corresponding
+                to counterpart in input_text
+            target_class_idx (int) - index of the target style class used for directional
+                score correction
+
+        Returns:
+            A list of floats with corresponding style transfer intensity scores.
+
+        """
+
+        if len(input_text) != len(output_text):
+            raise ValueError(
+                "input_text and output_text must be of same length with corresponding items"
+            )
+
+        input_dist = [item["distribution"] for item in self.score(input_text)]
+        output_dist = [item["distribution"] for item in self.score(output_text)]
+
+        return [
+            self.calculate_sti_fraction(
+                input_dist[i],
+                output_dist[i],
+                ideal_dist=[0.0, 1.0],
+                target_class_idx=target_class_idx,
+            )
+            for i in range(len(input_dist))
+        ]
+
+    def calculate_sti_fraction(
+        self, input_dist, output_dist, ideal_dist=[0.0, 1.0], target_class_idx=1
+    ):
+        """
+        Calculate the direction-corrected style transfer intensity fraction between
+        two style distributions of equal length.
+
+        If output_dist moves closer towards target style class, the metric represents the percentage of
+        the possible _target_ style distribution that was captured during the transfer. If output_dist
+        moves further from the target style class, the metric represents the percentage of the possible
+        _source_ style distribution that was captured.
+
+        Args:
+            input_dist (list) - probabilities assigned to the style classes
+                from the input text to style transfer model
+            output_dist (list) - probabilities assigned to the style classes
+                from the outut text of the style transfer model
+            ideal_dist (list, optional): The maximum possibly distribution. Defaults to [0.0, 1.0].
+            target_class_idx (int, optional)
+
+        Returns:
+            sti_fraction (float)
+        """
+
+        sti = self.calculate_emd(input_dist, output_dist, target_class_idx)
+
+        if sti > 0:
+            potential = self.calculate_emd(input_dist, ideal_dist, target_class_idx)
+        else:
+            potential = self.calculate_emd(
+                input_dist, ideal_dist[::-1], target_class_idx
+            )
+
+        return sti / potential
+
     @staticmethod
     def calculate_emd(input_dist, output_dist, target_class_idx):
         """

@@ -86,14 +86,15 @@ st.sidebar.write(
 
 st.sidebar.markdown("## Select a style attribute")
 style_attribute = st.sidebar.selectbox(
-    "What style would you like to transfer between?",
-    options=DATA_PACKET.keys()
+    "What style would you like to transfer between?", options=DATA_PACKET.keys()
 )
 STYLE_ATTRIBUTE_DATA = DATA_PACKET[style_attribute]
 
 st.sidebar.markdown("## Start over")
-st.sidebar.caption("This application is intended to be run sequentially from top to bottom. If you wish to alter selections after \
-    advancing through the app, push the button below to start fresh from the beginning.")
+st.sidebar.caption(
+    "This application is intended to be run sequentially from top to bottom. If you wish to alter selections after \
+    advancing through the app, push the button below to start fresh from the beginning."
+)
 st.sidebar.button("Restart from beginning", on_click=reset_page_progress_state)
 
 # MAIN CONTENT
@@ -361,13 +362,13 @@ if st.session_state.page_progress > 4:
     with col5_1:
         st.metric(
             label="Style Transfer Intensity (STI)",
-            value=f"{round(sti[0]*100,2)}",
+            value=f"{round(sti[0]*100,2)}%",
         )
         st.caption(
             f"""
                 STI compares the style class distributions (determined by the [style classifier]({STYLE_ATTRIBUTE_DATA.build_model_url("cls")}))
-                between the input text and generated suggestion using Earth Mover's Distance. Therefore, STI can be thought of as the degree to which style was altered ranging
-                between -100 and 100. EXPLAIN MORE
+                between the input text and generated suggestion using Earth Mover's Distance. Therefore, STI can be thought of as the percentage of the possible target style distribution
+                that was captured during the transfer.
                 """
         )
 

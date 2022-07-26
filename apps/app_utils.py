@@ -165,9 +165,7 @@ def get_cached_word_attributions(
             ]
         )
     }
-    it.explainer.label2id = {
-        v: k for k, v in it.explainer.id2label.items()
-    }
+    it.explainer.label2id = {v: k for k, v in it.explainer.id2label.items()}
     return it.visualize_feature_attribution_scores(text_sample).data
 
 
@@ -193,7 +191,7 @@ def get_sti_metric(
     sti = StyleIntensityClassifier(
         model_identifier=style_data.cls_model_path,
     )
-    return sti.calculate_transfer_intensity(
+    return sti.calculate_transfer_intensity_fraction(
         string_to_list_string(input_text), string_to_list_string(output_text)
     )
 
@@ -226,6 +224,7 @@ def get_cps_metric(
         string_to_list_string(output_text),
         mask_type="none",
     )
+
 
 def generate_style_transfer(
     text_sample: str,
