@@ -42,8 +42,30 @@ import pytest
 import transformers
 
 from src.style_transfer import StyleTransfer
-from src.content_preservation import ContentPreservationScorer
 from src.style_classification import StyleIntensityClassifier
+from src.content_preservation import ContentPreservationScorer
+from src.transformer_interpretability import InterpretTransformer
+
+
+@pytest.fixture
+def subjectivity_example_data():
+    examples = [
+        """there is an iconic roadhouse, named "spud's roadhouse", which sells fuel and general shop items , has great meals and has accommodation.""",
+        "chemical abstracts service (cas), a prominent division of the american chemical society, is the world's leading source of chemical information.",
+        "the most serious scandal was the iran-contra affair.",
+        "another strikingly elegant four-door saloon for the s3 continental came from james young.",
+        "other ambassadors also sent their messages of condolence following her passing.",
+    ]
+
+    ground_truth = [
+        'there is a roadhouse, named "spud\'s roadhouse", which sells fuel and general shop items and has accommodation.',
+        "chemical abstracts service (cas), a division of the american chemical society, is a source of chemical information.",
+        "one controversy was the iran-contra affair.",
+        "another four-door saloon for the s3 continental came from james young.",
+        "other ambassadors also sent their messages of condolence following her death.",
+    ]
+
+    return {"examples": examples, "ground_truth": ground_truth}
 
 
 @pytest.fixture
@@ -68,26 +90,12 @@ def subjectivity_contentpreservationscorer():
 
 
 @pytest.fixture
-def subjectivity_example_data():
-    examples = [
-        """there is an iconic roadhouse, named "spud's roadhouse", which sells fuel and general shop items , has great meals and has accommodation.""",
-        "chemical abstracts service (cas), a prominent division of the american chemical society, is the world's leading source of chemical information.",
-        "the most serious scandal was the iran-contra affair.",
-        "another strikingly elegant four-door saloon for the s3 continental came from james young.",
-        "other ambassadors also sent their messages of condolence following her passing.",
-    ]
-
-    ground_truth = [
-        'there is a roadhouse, named "spud\'s roadhouse", which sells fuel and general shop items and has accommodation.',
-        "chemical abstracts service (cas), a division of the american chemical society, is a source of chemical information.",
-        "one controversy was the iran-contra affair.",
-        "another four-door saloon for the s3 continental came from james young.",
-        "other ambassadors also sent their messages of condolence following her death.",
-    ]
-
-    return {"examples": examples, "ground_truth": ground_truth}
+def subjectivity_interprettransformer():
+    CLS_MODEL_PATH = "cffl/bert-base-styleclassification-subjective-neutral"
+    return InterpretTransformer(cls_model_identifier=CLS_MODEL_PATH)
 
 
+# test class initialization
 def test_StyleTransfer_init(subjectivity_styletransfer):
     assert isinstance(
         subjectivity_styletransfer.pipeline,
@@ -113,6 +121,14 @@ def test_ContentPreservationScorer_init(subjectivity_contentpreservationscorer):
     )
 
 
+def test_InterpretTransformer_init(subjectivity_interprettransformer):
+    assert isinstance(
+        subjectivity_interprettransformer.cls_model,
+        transformers.models.bert.modeling_bert.BertForSequenceClassification,
+    )
+
+
+# test class functionality
 def test_StyleTransfer_transfer(subjectivity_styletransfer, subjectivity_example_data):
     assert subjectivity_example_data[
         "ground_truth"
