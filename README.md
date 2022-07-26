@@ -37,7 +37,7 @@ Through the application, we emphasize the imperative for a human-in-the-loop use
 │   └── images
 └── tests
     ├── __init__.py
-    └── test_style_transfer.py
+    └── test_model_classes.py
 ```
 
 By launching this applied machine learning prototype (AMP) on CML, the following steps will be taken to recreate the project in your workspace:
