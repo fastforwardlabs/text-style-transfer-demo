@@ -2,9 +2,9 @@
 
 A demonstration of how the NLP task of _text style transfer_ can be applied to enhance the human writing experience using [HuggingFace Transformers](https://huggingface.co/) and [Streamlit](https://streamlit.io/).
 
-> This repo accompanies Cloudera Fast Forward Labs' [blog series](https://blog.fastforwardlabs.com/2022/03/22/an-introduction-to-text-style-transfer.html) in which we explore the task of automatically neutralizing subjectivity bias in free text.
-
 ![](/static/images/app_screenshot.png)
+
+> This repo accompanies Cloudera Fast Forward Labs' [blog series](https://blog.fastforwardlabs.com/2022/03/22/an-introduction-to-text-style-transfer.html) in which we explore the task of automatically neutralizing subjectivity bias in free text.
 
 The goal of this application is to demonstrate how the NLP task of text style transfer can be applied to enhance the human writing experience. In this sense, we intend to peel back the curtains on how an intelligent writing assistant might function — walking through the logical steps needed to automatically re-style a piece of text (from informal-to-formal **or** subjective-to-neutral) while building up confidence in the model output.
 
