@@ -47,6 +47,7 @@ from transformers import (
 
 from apps.visualization_utils import visualize_text
 
+
 class CustomSequenceClassificationExplainer(SequenceClassificationExplainer):
     """
     Subclassing to replace `visualize()` method with custom styling.
@@ -54,6 +55,8 @@ class CustomSequenceClassificationExplainer(SequenceClassificationExplainer):
     Namely, removing a few columns, styling fonts, and re-arrangning legend position.
     """
 
+    # NOTE - this function is borrowed and overwritten from the Transformers Interpret library
+    # https://github.com/cdpierse/transformers-interpret/blob/3076df0d94963e66bade1e7047808e64d4490247/transformers_interpret/explainers/sequence_classification.py#L133
     def visualize(self, html_filepath: str = None, true_class: str = None):
         """
         Visualizes word attributions. If in a notebook table will be displayed inline.
