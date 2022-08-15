@@ -16,18 +16,18 @@ Through the application, we emphasize the imperative for a human-in-the-loop use
 .
 ├── LICENSE
 ├── README.md
-├── apps
+├── apps                                      # Code to support the Streamlit application
 │   ├── app.py
 │   ├── app_utils.py
 │   ├── data_utils.py
 │   └── visualization_utils.py
 ├── requirements.txt
-├── scripts
+├── scripts                                   # Utility scripts for project and application setup
 │   ├── download_models.py
 │   ├── install_dependencies.py
 │   └── launch_app.py
 ├── setup.py
-├── src
+├── src                                       # Main library + classes used throughout the app
 │   ├── __init__.py
 │   ├── content_preservation.py
 │   ├── style_classification.py
@@ -35,7 +35,7 @@ Through the application, we emphasize the imperative for a human-in-the-loop use
 │   └── transformer_interpretability.py
 ├── static
 │   └── images
-└── tests
+└── tests                                     # Basic testing to validate classes in src/ directory
     ├── __init__.py
     └── test_model_classes.py
 ```
@@ -51,3 +51,27 @@ This AMP was developed against Python 3.9. There are two ways to launch the proj
 
 1. **From Prototype Catalog** - Navigate to the AMPs tab on a CML workspace, select the "Exploring Intelligent Writing Assistance" tile, click "Launch as Project", click "Configure Project"
 2. **As an AMP** - In a CML workspace, click "New Project", add a Project Name, select "AMPs" as the Initial Setup option, copy in this repo URL, click "Create Project", click "Configure Project"
+
+## Running the Project Outside of CML
+
+The code and application within were developed against Python 3.9, and are likely also to function with more recent versions of Python.
+
+To setup the project, first create and activate a new virtual environment through your preferred means. Then pip install dependencies and download the required HuggingFace models:
+
+```
+python -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt && python3 scripts/download_models.py
+```
+
+Finally, launch the Streamlit application:
+
+```
+streamlit run apps/app.py
+```
+
+**Note:** Since the app utilizes several large Transformer models, you'll need at least 2vCPU / 4GB RAM.
+
+## Tests
+
+A handful of tests are included that can be used to validate the basic initialiation and functionality of the custom classes found in the `src/` directory. These tests should be run before merging any changes to the repo by running the `pytest` command from the project root directory.
