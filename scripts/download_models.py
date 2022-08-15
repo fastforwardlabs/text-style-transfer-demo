@@ -53,7 +53,7 @@ def load_and_cache_HF_models(style_data_packet):
         style_data_packet (dict)
     """
 
-    for style_data in style_data_packet.keys():
+    for style_data in style_data_packet.values():
         try:
             st = StyleTransfer(model_identifier=style_data.seq2seq_model_path)
             sic = StyleIntensityClassifier(style_data.cls_model_path)
@@ -66,5 +66,6 @@ def load_and_cache_HF_models(style_data_packet):
         except Exception as e:
             print(e)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     load_and_cache_HF_models(DATA_PACKET)
